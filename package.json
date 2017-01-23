@@ -1,0 +1,19 @@
+{
+  "name": "shieldjs",
+  "version": "1.0.0",
+  "description": "Easy implementation for auth2 authentication to secure your server, based on passportjs. First including JWT middleware to handle auth2 access token, and also automatic creation of authentication routes for each required strategy.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/talberko/shieldjs.git"
+  },
+  "author": "Tal Berko",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/talberko/shieldjs/issues"
+  },
+  "homepage": "https://github.com/talberko/shieldjs#readme"
+}
