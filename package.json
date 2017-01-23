@@ -1,6 +1,6 @@
 {
   "name": "shieldjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Easy implementation for auth2 authentication to secure your server, based on passportjs. First including JWT middleware to handle auth2 access token, and also automatic creation of authentication routes for each required strategy.",
   "main": "index.js",
   "scripts": {
