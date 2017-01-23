@@ -22,7 +22,6 @@ function initStrategy(name, provider) {
                 clientSecret: provider.CLIENT_SECRET,
                 callbackURL:  provider.CALLBACK_URL
             }, function(accessToken, refreshToken, extraParams, profile, done) {
-                console.log(extraParams);
                 return done(null, extraParams);
             });
 
@@ -63,10 +62,7 @@ function initRoutes(providerName) {
         session: false,
         failureRedirect: authRoute + '/login'
     }), function (req, res) {
-        console.log(req.user);
-        res.cookie('id_token', req.user.id_token).status(200).render('templates/postlogin.html', {
-            user: req.user
-        });
+        res.cookie('id_token', req.user.id_token).redirect('/');
     });
 
     router.get('/logoutcallback', function (req, res) {
