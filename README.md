@@ -22,7 +22,7 @@
 #### Install ShieldJS from npm:
 
 ```bash
-$ npm install -g express-generator@4
+$ npm install --save shieldjs
 ```
 
 #### Require ShieldJS, and use it as middleware for your app:
