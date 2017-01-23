@@ -56,7 +56,7 @@ function initRoutes(providerName) {
 
     router.get('/logout', function (req, res) {
         console.log('Logout...');
-        res.redirect(`https://${Provider.DOMAIN}/v2/logout?returnTo=http://localhost:8001/auth/logoutcallback&client_id=${Provider.CLIENT_ID}`);
+        res.redirect("https://" + Provider.DOMAIN + "/v2/logout?returnTo=" + req.protocol + '://' + req.get('host') + req.originalUrl + "callback&client_id=" +  Provider.CLIENT_ID);
     });
 
     router.get('/callback', passport.authenticate(providerName, {
