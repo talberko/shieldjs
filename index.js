@@ -77,7 +77,7 @@ function initRoutes(providerName) {
     return router;
 }
 
-module.exports = function(app, options) {
+module.exports = function(options) {
     if(!options.cookieless){
         initCookie();
     }
