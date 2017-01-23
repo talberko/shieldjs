@@ -82,7 +82,7 @@ module.exports = function(options) {
         initCookie();
     }
 
-    authRoute = options.route ? options.route : '/';
+    authRoute = options.authRoute ? options.authRoute : '/';
 
     // Init passport and strategy
     if(options.providers){
@@ -90,7 +90,7 @@ module.exports = function(options) {
         for(let provider in options.providers){
             if(providerOpts.indexOf(provider) > -1){
                 initStrategy(provider, options.providers[provider]);
-                router.use(options.route, initRoutes(provider));
+                router.use(options.authRoute, initRoutes(provider));
 
                 break;
             }
