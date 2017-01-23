@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/talberko/shieldjs/issues"
   },
-  "homepage": "https://github.com/talberko/shieldjs#readme"
+  "homepage": "https://github.com/talberko/shieldjs#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.3",
+    "express": "^4.14.0",
+    "express-jwt": "^5.1.0",
+    "passport": "^0.3.2"
+  }
 }
