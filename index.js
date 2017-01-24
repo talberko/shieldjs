@@ -102,7 +102,7 @@ module.exports = function(options) {
             audience: Provider.CLIENT_ID,
             getToken: function fromHeaderOrQuerystring(req) {
                 console.log("Getting Token...");
-                const auth = req.headers.authorization && req.headers.authorization.split(/\/s+/);
+                const auth = req.headers.authorization && req.headers.authorization.split(/\s+/);
                 if (auth && auth[0] === 'Bearer') {
                     return auth[1];
                 } 
