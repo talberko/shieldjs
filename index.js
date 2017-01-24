@@ -1,7 +1,3 @@
-/**
- * Created by User on 18/01/2017.
- */
-
 const jwt = require('express-jwt');
 const passport = require('passport');
 const cookieParser = require('cookie-parser');
@@ -55,7 +51,7 @@ function initRoutes(providerName) {
 
     router.get('/logout', function (req, res) {
         console.log('Logout...');
-        res.redirect("https://" + Provider.DOMAIN + "/v2/logout?returnTo=" + req.protocol + '://' + req.get('host') + req.originalUrl + "callback&client_id=" +  Provider.CLIENT_ID);
+        res.redirect(`https://${Provider.DOMAIN}/v2/logout?returnTo=${req.protocol}://${req.get('host')}${req.originalUrl}callback&client_id=${Provider.CLIENT_ID}`);
     });
 
     router.get('/callback', passport.authenticate(providerName, {
@@ -74,39 +70,43 @@ function initRoutes(providerName) {
 }
 
 module.exports = function(options) {
-    if(!options.cookieless){
+    if(!options.cookieless) {
         initCookie();
     }
 
     authRoute = options.authRoute ? options.authRoute : '/';
 
     // Init passport and strategy
-    if(options.providers){
+    if(options.providers) {
         initPassport();
         for(let provider in options.providers){
-            if(providerOpts.indexOf(provider) > -1){
+            if(providerOpts.includes(provider)) {
                 initStrategy(provider, options.providers[provider]);
                 router.use(options.authRoute, initRoutes(provider));
-
                 break;
             }
         }
     }
 
     router.use(function(req, res, next) {
-        if (options.excludeRoutes)
-            for (let i = 0; i < options.excludeRoutes.length; i++)
-                if (req.path.startsWith(options.excludeRoutes[i]))
+        if (options.excludeRoutes) {
+            for (let i = 0; i < options.excludeRoutes.length; i++) {
+                if (req.path.startsWith(options.excludeRoutes[i])) {
                     return next();
+                }
+            }
+        }
 
         jwt({
-            secret: new Buffer(Provider.CLIENT_SECRET),
+            secret: Buffer.from(Provider.CLIENT_SECRET),
             audience: Provider.CLIENT_ID,
             getToken: function fromHeaderOrQuerystring(req) {
                 console.log("Getting Token...");
-                if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
-                    return req.headers.authorization.split(' ')[1];
-                } else if (req.cookies && req.cookies.id_token) {
+                const auth = req.headers.authorization && req.headers.authorization.split(/\s+/);
+                if (auth && auth[0] === 'Bearer') {
+                    return auth[1];
+                } 
+                if (req.cookies && req.cookies.id_token) {
                     return req.cookies.id_token;
                 }
                 return null;
@@ -116,8 +116,9 @@ module.exports = function(options) {
 
     // Handle unauthorized
     router.use(function (err, req, res, next) {
-        if (err.name === 'UnauthorizedError')
-            options.unauthorizedFunc ? options.unauthorizedFunc(req, res, next) : res.redirect(authRoute + '/login');
+        if (err.name === 'UnauthorizedError') {
+            options.unauthorizedFunc ? options.unauthorizedFunc(req, res, next) : res.redirect(`${authRoute}/login`);
+        }
     });
 
     return router;
