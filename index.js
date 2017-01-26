@@ -8,9 +8,12 @@ const cookieParser = require('cookie-parser');
 const router = require('express').Router();
 const providerOpts = ['auth0'];
 const jwks = require('jwks-rsa');
+var jwtDecode = require('jwt-decode');
 const request = require('request');
+var Promise = require('promise');
 
 let authRoute;
+let access_token;
 
 function initStrategy(name, credentials) {
     let strategy;
@@ -23,6 +26,7 @@ function initStrategy(name, credentials) {
                 clientSecret: credentials.secret,
                 callbackURL:  credentials.callback_url
             }, function(accessToken, refreshToken, extraParams, profile, done) {
+                console.log('aa');
                 return done(null, extraParams);
             });
 
@@ -86,6 +90,8 @@ module.exports = {
                     if (req.path.startsWith(options.excludeRoutes[i]))
                         return next();
 
+            console.log(authRoute);
+
             if(authRoute){
                 if (req.originalUrl.startsWith(authRoute))
                     return next();
@@ -95,7 +101,7 @@ module.exports = {
                 secret: options.secret,
                 audience: options.client_id,
                 getToken: function fromHeaderOrQuerystring(req) {
-                    console.log("Getting Token...");
+                    console.log("Validating Token...");
                     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
                         return req.headers.authorization.split(' ')[1];
                     } else if (req.cookies && req.cookies.id_token) {
@@ -155,27 +161,36 @@ module.exports = {
             jwksUri: `https://${domain}/.well-known/jwks.json`
         })
     },
-    requestTokenForApi: function(api_url, credentials, successFunc) {
-        var auth_opts = {
-            method: 'POST',
-            url: `https://${credentials.domain}/oauth/token`,
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({
-                client_id: credentials.client_id,
-                client_secret: credentials.secret,
-                audience: api_url,
-                grant_type: "client_credentials"
-            })
-        };
+    requestTokenForApi: function(api_url, credentials) {
+        return new Promise(function (fulfill, reject) {
+            if(!access_token || (jwtDecode(access_token)).exp >= new Date().getTime()){
+                console.log("Requesting Token For API");
+                var auth_opts = {
+                    method: 'POST',
+                    url: `https://${credentials.domain}/oauth/token`,
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: credentials.client_id,
+                        client_secret: credentials.secret,
+                        audience: api_url,
+                        grant_type: "client_credentials"
+                    })
+                };
 
-        request(auth_opts, function(err, res) {
-            let auth_header;
-            if(res.statusCode == 200){
-                const body = JSON.parse(res.body);
-                auth_header = `${body.token_type} ${body.access_token}`;
+                request(auth_opts, function(err, res) {
+                    if(err) reject(err);
+                    let auth_header;
+                    if(res.statusCode == 200){
+                        const body = JSON.parse(res.body);
+                        auth_header = body.access_token;
+                        access_token = auth_header;
+                        fulfill('Bearer ' + access_token);
+                    }
+                })
             }
 
-            successFunc(err, auth_header);
+            else
+                fulfill('Bearer ' + access_token);
         })
     }
 }
