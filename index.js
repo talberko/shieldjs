@@ -7,20 +7,21 @@ const passport = require('passport');
 const cookieParser = require('cookie-parser');
 const router = require('express').Router();
 const providerOpts = ['auth0'];
+const jwks = require('jwks-rsa');
+const request = require('request');
 
-let Provider;
 let authRoute;
 
-function initStrategy(name, provider) {
+function initStrategy(name, credentials) {
     let strategy;
     switch (name){
         case 'auth0':{
             const Auth0Strategy = require('passport-auth0');
             strategy = new Auth0Strategy({
-                domain:       provider.DOMAIN,
-                clientID:     provider.CLIENT_ID,
-                clientSecret: provider.CLIENT_SECRET,
-                callbackURL:  provider.CALLBACK_URL
+                domain:       credentials.domain,
+                clientID:     credentials.client_id,
+                clientSecret: credentials.secret,
+                callbackURL:  credentials.callback_url
             }, function(accessToken, refreshToken, extraParams, profile, done) {
                 return done(null, extraParams);
             });
@@ -30,7 +31,7 @@ function initStrategy(name, provider) {
     }
     // Configure Passport to use Auth0
 
-    Provider = provider;
+    credentials = credentials;
     passport.use(strategy);
 }
 
@@ -50,12 +51,12 @@ function initCookie() {
     router.use(cookieParser());
 }
 
-function initRoutes(providerName) {
+function initRoutes(providerName, credentials) {
     router.get('/login', passport.authenticate(providerName, { session: false }));
 
     router.get('/logout', function (req, res) {
         console.log('Logout...');
-        res.redirect("https://" + Provider.DOMAIN + "/v2/logout?returnTo=" + req.protocol + '://' + req.get('host') + req.originalUrl + "callback&client_id=" +  Provider.CLIENT_ID);
+        res.redirect("https://" + credentials.domain + "/v2/logout?returnTo=" + req.protocol + '://' + req.get('host') + req.originalUrl + "callback&client_id=" +  credentials.client_id);
     });
 
     router.get('/callback', passport.authenticate(providerName, {
@@ -73,52 +74,108 @@ function initRoutes(providerName) {
     return router;
 }
 
-module.exports = function(options) {
-    if(!options.cookieless){
-        initCookie();
-    }
-
-    authRoute = options.authRoute ? options.authRoute : '/';
-
-    // Init passport and strategy
-    if(options.providers){
-        initPassport();
-        for(let provider in options.providers){
-            if(providerOpts.indexOf(provider) > -1){
-                initStrategy(provider, options.providers[provider]);
-                router.use(options.authRoute, initRoutes(provider));
-
-                break;
-            }
+module.exports = {
+    jwt: function(options) {
+        if(!options.cookieless){
+            initCookie();
         }
-    }
 
-    router.use(function(req, res, next) {
-        if (options.excludeRoutes)
-            for (let i = 0; i < options.excludeRoutes.length; i++)
-                if (req.path.startsWith(options.excludeRoutes[i]))
+        router.use(function (req, res, next) {
+            if (options.excludeRoutes)
+                for (let i = 0; i < options.excludeRoutes.length; i++)
+                    if (req.path.startsWith(options.excludeRoutes[i]))
+                        return next();
+
+            if(authRoute){
+                if (req.originalUrl.startsWith(authRoute))
                     return next();
-
-        jwt({
-            secret: new Buffer(Provider.CLIENT_SECRET),
-            audience: Provider.CLIENT_ID,
-            getToken: function fromHeaderOrQuerystring(req) {
-                console.log("Getting Token...");
-                if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
-                    return req.headers.authorization.split(' ')[1];
-                } else if (req.cookies && req.cookies.id_token) {
-                    return req.cookies.id_token;
-                }
-                return null;
             }
-        })(req, res, next)
-    });
 
-    // Handle unauthorized
-    router.use(function (err, req, res, next) {
-        if (err.name === 'UnauthorizedError')
-            options.unauthorizedFunc ? options.unauthorizedFunc(req, res, next) : res.redirect(authRoute + '/login');
-    });
+            jwt({
+                secret: options.secret,
+                audience: options.client_id,
+                getToken: function fromHeaderOrQuerystring(req) {
+                    console.log("Getting Token...");
+                    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+                        return req.headers.authorization.split(' ')[1];
+                    } else if (req.cookies && req.cookies.id_token) {
+                        return req.cookies.id_token;
+                    }
+                    return null;
+                }
+            })(req, res, next)
+        });
 
-    return router;
+        // Handle unauthorized
+        router.use(function (err, req, res, next) {
+            if (err.name === 'UnauthorizedError'){
+                console.log(`ShieldJS - UNAUTHORIZED`);
+                next(err);
+            } else next();
+        });
+
+        return router;
+    },
+    authRoutes: function (options) {
+        authRoute = options.authRoute ? options.authRoute : '/';
+
+        if(options.provider && options.credentials){
+            initPassport();
+            initStrategy(options.provider, options.credentials);
+            router.use(options.authRoute, initRoutes(options.provider, options.credentials));
+
+            router.use(function (err, req, res, next) {
+                if (err.name === 'UnauthorizedError'){
+                    console.log(`ShieldJS Redirect to:  ${authRoute}/login!`);
+                    return res.redirect(authRoute + '/login');
+                }
+
+                next();
+            });
+        }
+
+        return router;
+    },
+    allowScopes: function(scopes){
+        return function (req, res, next) {
+            const has_scopes = scopes.every(function (scope) {
+                return req.user.scope.indexOf(scope) > -1;
+            });
+
+            if (!has_scopes) { return res.sendStatus(401); }
+
+            next();
+        };
+    },
+    secretFromUrl: function(domain) {
+        return jwks.expressJwtSecret({
+            cache: true,
+            rateLimit: true,
+            jwksRequestsPerMinute: 5,
+            jwksUri: `https://${domain}/.well-known/jwks.json`
+        })
+    },
+    requestTokenForApi: function(api_url, credentials, successFunc) {
+        var auth_opts = {
+            method: 'POST',
+            url: `https://${credentials.domain}/oauth/token`,
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                client_id: credentials.client_id,
+                client_secret: credentials.secret,
+                audience: api_url,
+                grant_type: "client_credentials"
+            })
+        };
+
+        request(auth_opts, function(err, res) {
+            let auth_header;
+            if(res.statusCode == 200){
+                const body = JSON.parse(res.body);
+                auth_header = `${body.token_type} ${body.access_token}`;
+            }
+
+            successFunc(err, auth_header);
+        })
+    }
 }
