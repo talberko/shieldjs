@@ -115,7 +115,9 @@ module.exports = {
         // Handle unauthorized
         router.use(function (err, req, res, next) {
             if (err.name === 'UnauthorizedError'){
+                err.stack = "";
                 console.log(`ShieldJS - UNAUTHORIZED`);
+                res.status(401);
                 next(err);
             } else next();
         });
@@ -131,7 +133,7 @@ module.exports = {
             router.use(options.authRoute, initRoutes(options.provider, options.credentials));
 
             router.use(function (err, req, res, next) {
-                if (err.name === 'UnauthorizedError'){
+                if (res.statusCode === 401){
                     console.log(`ShieldJS Redirect to:  ${authRoute}/login!`);
                     return res.redirect(authRoute + '/login');
                 }

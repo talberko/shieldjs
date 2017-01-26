@@ -1,0 +1,118 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\nodejs\\node.exe',
+1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'publish' ]
+2 info using npm@3.10.8
+3 info using node@v6.9.1
+4 verbose publish [ '.' ]
+5 silly cache add args [ '.', null ]
+6 verbose cache add spec .
+7 silly cache add parsed spec Result {
+7 silly cache add   raw: '.',
+7 silly cache add   scope: null,
+7 silly cache add   escapedName: null,
+7 silly cache add   name: null,
+7 silly cache add   rawSpec: '.',
+7 silly cache add   spec: 'C:\\git\\shieldjs',
+7 silly cache add   type: 'directory' }
+8 verbose addLocalDirectory C:\Users\User\AppData\Roaming\npm-cache\shieldjs\1.1.1\package.tgz not in flight; packing
+9 verbose correctMkdir C:\Users\User\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+10 info lifecycle shieldjs@1.1.1~prepublish: shieldjs@1.1.1
+11 silly lifecycle shieldjs@1.1.1~prepublish: no script for prepublish, continuing
+12 verbose tar pack [ 'C:\\Users\\User\\AppData\\Roaming\\npm-cache\\shieldjs\\1.1.1\\package.tgz',
+12 verbose tar pack   'C:\\git\\shieldjs' ]
+13 verbose tarball C:\Users\User\AppData\Roaming\npm-cache\shieldjs\1.1.1\package.tgz
+14 verbose folder C:\git\shieldjs
+15 verbose addLocalTarball adding from inside cache C:\Users\User\AppData\Roaming\npm-cache\shieldjs\1.1.1\package.tgz
+16 verbose correctMkdir C:\Users\User\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+17 silly cache afterAdd shieldjs@1.1.1
+18 verbose afterAdd C:\Users\User\AppData\Roaming\npm-cache\shieldjs\1.1.1\package\package.json not in flight; writing
+19 verbose correctMkdir C:\Users\User\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+20 verbose afterAdd C:\Users\User\AppData\Roaming\npm-cache\shieldjs\1.1.1\package\package.json written
+21 silly publish { name: 'shieldjs',
+21 silly publish   version: '1.1.1',
+21 silly publish   description: 'Easy implementation for auth2 authentication to secure your server, based on passportjs. First including JWT middleware to handle auth2 access token, and also automatic creation of authentication routes for each required strategy.',
+21 silly publish   main: 'index.js',
+21 silly publish   scripts: { test: 'echo "Error: no test specified" && exit 1' },
+21 silly publish   repository:
+21 silly publish    { type: 'git',
+21 silly publish      url: 'git+https://github.com/talberko/shieldjs.git' },
+21 silly publish   author: { name: 'Tal Berko' },
+21 silly publish   license: 'ISC',
+21 silly publish   bugs: { url: 'https://github.com/talberko/shieldjs/issues' },
+21 silly publish   homepage: 'https://github.com/talberko/shieldjs#readme',
+21 silly publish   dependencies:
+21 silly publish    { 'cookie-parser': '^1.4.3',
+21 silly publish      express: '^4.14.0',
+21 silly publish      'express-jwt': '^5.1.0',
+21 silly publish      'jwks-rsa': '^1.1.1',
+21 silly publish      'jwt-decode': '^2.1.0',
+21 silly publish      passport: '^0.3.2',
+21 silly publish      'passport-auth0': '^0.6.0',
+21 silly publish      promise: '^7.1.1',
+21 silly publish      request: '^2.79.0' },
+21 silly publish   readme: '<p align="center">\r\n  <img src=\'https://cloud.githubusercontent.com/assets/25296482/22207186/d3d2a126-e186-11e6-9dc4-33b5e7aa84fe.png\' height=250 />\r\n</p>\r\n---\r\n# What is ShieldJS\r\n#### ShieldJS makes it easier than ever to secure your server with auth2 and jwt. \r\n###### Currently, we only support auth0 (<https://www.auth0.com>) as auth2 provider. You are welcome to commit another provider\'s support to our library :)\r\n\r\n# How ShieldJS Works?\r\n#### The library contains two security parts:\r\n1. JWT Middleware - By using ShieldJS, your server routes will be totally secured by JWT (JSON Web Token). This middleware will look for a bearer token in the request header, and if not found will look for it in the cookie.\r\n2. Auth Routes - shieldJS will create the standard auth2 authentication routes for you. \r\n\r\n# What do I have to do?\r\n1. Choose your auth2 provider. For now, we only support auth0 provider (<https://www.auth0.com>), and register.\r\n2. Install ShieldJS.\r\n3. Use ShieldJS as middleware.\r\n4. Initialize ShieldJS with your provider\'s application data.\r\n5. Be Secured :)\r\n\r\n# How to implement?\r\n#### Install ShieldJS from npm:\r\n\r\n```bash\r\n$ npm install --save shieldjs\r\n```\r\n\r\n#### Require ShieldJS, and use it as middleware for your app:\r\n```js\r\n\r\nconst express = require(\'express\');\r\nconst shield = require("shieldjs");\r\n\r\nconst app = express();\r\n\r\napp.use(shield(\r\n    {\r\n        excludeRoutes: [\'/public\'], // Will not be under the sheild\r\n        authRoute: \'/auth\',         // (OPTIONAL) Base route for authentication\r\n        providers:                  // Your auth2 providers\r\n            {\r\n                auth0: {\r\n                    DOMAIN: AUTH0.DOMAIN,\r\n                    CLIENT_ID: AUTH0.CLIENT_ID,\r\n                    CLIENT_SECRET: AUTH0.CLIENT_SECRET,\r\n                    CALLBACK_URL: AUTH0.CALLBACK_URL\r\n                }\r\n            }\r\n    }\r\n));\r\n```\r\n\r\n#### If authRoute will not be provided, not authentication routes will be created!\r\n\r\n#### Authentication routes will be created in this example:\r\n1. /auth/login\r\n2. /auth/logout\r\n3. /auth/callback\r\n4. /auth/logoutcallback\r\n',
+21 silly publish   readmeFilename: 'README.md',
+21 silly publish   gitHead: '21991958626ef4d8aec356fc8be73da46f0e88e5',
+21 silly publish   _id: 'shieldjs@1.1.1',
+21 silly publish   _shasum: 'e66c8f7a269bc849e2486df3c9303939780908b3',
+21 silly publish   _from: '.' }
+22 verbose getPublishConfig undefined
+23 silly mapToRegistry name shieldjs
+24 silly mapToRegistry using default registry
+25 silly mapToRegistry registry https://registry.npmjs.org/
+26 silly mapToRegistry data Result {
+26 silly mapToRegistry   raw: 'shieldjs',
+26 silly mapToRegistry   scope: null,
+26 silly mapToRegistry   escapedName: 'shieldjs',
+26 silly mapToRegistry   name: 'shieldjs',
+26 silly mapToRegistry   rawSpec: '',
+26 silly mapToRegistry   spec: 'latest',
+26 silly mapToRegistry   type: 'tag' }
+27 silly mapToRegistry uri https://registry.npmjs.org/shieldjs
+28 verbose publish registryBase https://registry.npmjs.org/
+29 silly publish uploading C:\Users\User\AppData\Roaming\npm-cache\shieldjs\1.1.1\package.tgz
+30 verbose request uri https://registry.npmjs.org/shieldjs
+31 verbose request sending authorization for write operation
+32 info attempt registry request try #1 at 16:09:53
+33 verbose request using bearer token for auth
+34 verbose request id 73f776b3353ecd9f
+35 http request PUT https://registry.npmjs.org/shieldjs
+36 http 403 https://registry.npmjs.org/shieldjs
+37 verbose headers { 'content-type': 'application/json',
+37 verbose headers   'cache-control': 'max-age=300',
+37 verbose headers   'content-length': '95',
+37 verbose headers   'accept-ranges': 'bytes',
+37 verbose headers   date: 'Thu, 26 Jan 2017 14:09:50 GMT',
+37 verbose headers   via: '1.1 varnish',
+37 verbose headers   connection: 'keep-alive',
+37 verbose headers   'x-served-by': 'cache-lhr6320-LHR',
+37 verbose headers   'x-cache': 'MISS',
+37 verbose headers   'x-cache-hits': '0',
+37 verbose headers   'x-timer': 'S1485439789.490114,VS0,VE856',
+37 verbose headers   vary: 'Accept-Encoding' }
+38 verbose request invalidating C:\Users\User\AppData\Roaming\npm-cache\registry.npmjs.org\shieldjs on PUT
+39 error publish Failed PUT 403
+40 verbose stack Error: "You cannot publish over the previously published version 1.1.1." : shieldjs
+40 verbose stack     at makeError (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:302:12)
+40 verbose stack     at CachingRegistryClient.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:290:14)
+40 verbose stack     at Request._callback (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:210:14)
+40 verbose stack     at Request.self.callback (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:187:22)
+40 verbose stack     at emitTwo (events.js:106:13)
+40 verbose stack     at Request.emit (events.js:191:7)
+40 verbose stack     at Request.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:1044:10)
+40 verbose stack     at emitOne (events.js:96:13)
+40 verbose stack     at Request.emit (events.js:188:7)
+40 verbose stack     at IncomingMessage.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:965:12)
+41 verbose statusCode 403
+42 verbose pkgid shieldjs
+43 verbose cwd C:\git\shieldjs
+44 error Windows_NT 10.0.14393
+45 error argv "C:\\Program Files\\nodejs\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "publish"
+46 error node v6.9.1
+47 error npm  v3.10.8
+48 error code E403
+49 error "You cannot publish over the previously published version 1.1.1." : shieldjs
+50 error If you need help, you may report this error at:
+50 error     <https://github.com/npm/npm/issues>
+51 verbose exit [ 1, true ]
