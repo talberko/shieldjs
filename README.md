@@ -37,9 +37,9 @@ const app = express();
 app.use(shield.jwt(
     {
         excludeRoutes: ['/abc'],
-		    domain: AUTH0.DOMAIN,
-		    client_id: AUTH0.CLIENT_ID,
-		    secret: AUTH0.CLIENT_SECRET
+    	domain: AUTH0.DOMAIN,
+    	client_id: AUTH0.CLIENT_ID,
+    	secret: AUTH0.CLIENT_SECRET
     }
 ));
 
