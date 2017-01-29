@@ -119,7 +119,7 @@ module.exports = {
                 console.log(`ShieldJS - UNAUTHORIZED`);
                 res.status(401);
                 next(err);
-            } else next();
+            }
         });
 
         return router;
