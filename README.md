@@ -33,21 +33,27 @@ const shield = require("shieldjs");
 
 const app = express();
 
-app.use(shield(
+// Will be used as JWT Middleware
+app.use(shield.jwt(
     {
-        excludeRoutes: ['/public'], // Will not be under the sheild
-        authRoute: '/auth',         // (OPTIONAL) Base route for authentication
-        providers:                  // Your auth2 providers
-            {
-                auth0: {
-                    DOMAIN: AUTH0.DOMAIN,
-                    CLIENT_ID: AUTH0.CLIENT_ID,
-                    CLIENT_SECRET: AUTH0.CLIENT_SECRET,
-                    CALLBACK_URL: AUTH0.CALLBACK_URL
-                }
-            }
+        excludeRoutes: ['/abc'],
+    	domain: AUTH0.DOMAIN,
+    	client_id: AUTH0.CLIENT_ID,
+    	secret: AUTH0.CLIENT_SECRET
     }
 ));
+
+// Will create routes for authentication
+app.use(shield.authRoutes({
+    authRoute: '/auth',
+    provider: 'auth0',
+    credentials:{
+        domain: AUTH0.DOMAIN,
+        client_id: AUTH0.CLIENT_ID,
+        secret: AUTH0.CLIENT_SECRET,
+        callback_url: AUTH0.CALLBACK_URL
+    }
+}))
 ```
 
 #### If authRoute will not be provided, not authentication routes will be created!
