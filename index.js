@@ -26,7 +26,6 @@ function initStrategy(name, credentials) {
                 clientSecret: credentials.secret,
                 callbackURL:  credentials.callback_url
             }, function(accessToken, refreshToken, extraParams, profile, done) {
-                console.log('aa');
                 return done(null, extraParams);
             });
 
@@ -89,8 +88,6 @@ module.exports = {
                 for (let i = 0; i < options.excludeRoutes.length; i++)
                     if (req.path.startsWith(options.excludeRoutes[i]))
                         return next();
-
-            console.log(authRoute);
 
             if(authRoute){
                 if (req.originalUrl.startsWith(authRoute))
