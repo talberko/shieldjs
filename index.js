@@ -96,7 +96,7 @@ module.exports = {
 
             jwt({
                 secret: options.secret,
-                audience: options.client_id,
+                audience: options.client_id || options.audience,
                 getToken: function fromHeaderOrQuerystring(req) {
                     console.log("Validating Token...");
                     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
@@ -178,11 +178,9 @@ module.exports = {
 
                 request(auth_opts, function(err, res) {
                     if(err) reject(err);
-                    let auth_header;
                     if(res.statusCode == 200){
                         const body = JSON.parse(res.body);
-                        auth_header = body.access_token;
-                        access_token = auth_header;
+                        access_token = body.access_token;
                         fulfill('Bearer ' + access_token);
                     }
                 })
