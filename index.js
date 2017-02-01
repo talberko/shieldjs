@@ -189,5 +189,26 @@ module.exports = {
             else
                 fulfill('Bearer ' + access_token);
         })
+    },
+    getUserInfo: function(options) {
+        return function(req, res, next) {
+            if(!req.user.profile){
+                var header;
+                if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+                    header = req.headers.authorization.split(' ')[1];
+                } else if (req.cookies && req.cookies.id_token) {
+                    header = req.cookies.id_token;
+                }
+
+                if(header){
+                    request.post({url: `https://${options.domain}/tokeninfo`, json: { id_token: header }}, function(err, res) {
+                        if(res.statusCode == 200){
+                            req.user.profile = res.body;
+                            return next();
+                        }
+                    })
+                }
+            } else next();
+        }
     }
 }
