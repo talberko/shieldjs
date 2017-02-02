@@ -109,14 +109,14 @@ module.exports = {
             })(req, res, next)
         });
 
-        // Handle unauthorized
         router.use(function (err, req, res, next) {
             if (err.name === 'UnauthorizedError'){
                 err.stack = "";
                 console.log(`ShieldJS - UNAUTHORIZED`);
                 res.status(401);
                 next(err);
-            }
+            } else if(options.userInfo)
+                this.getUserInfo({domain:options.domain})(req, res, next);
         });
 
         return router;
@@ -191,7 +191,7 @@ module.exports = {
         })
     },
     getUserInfo: function(options) {
-        return function(req, res, next) {
+        return function(err, req, res, next) {
             if(!req.user.profile){
                 var header;
                 if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
