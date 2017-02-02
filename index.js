@@ -77,6 +77,28 @@ function initRoutes(providerName, credentials) {
     return router;
 }
 
+function getUserInfo(options) {
+    return function(req, res, next) {
+        if(!req.user.profile){
+            var header;
+            if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+                header = req.headers.authorization.split(' ')[1];
+            } else if (req.cookies && req.cookies.id_token) {
+                header = req.cookies.id_token;
+            }
+
+            if(header){
+                request.post({url: `https://${options.domain}/tokeninfo`, json: { id_token: header }}, function(err, res) {
+                    if(res.statusCode == 200){
+                        req.user.profile = res.body;
+                        return next();
+                    }
+                })
+            }
+        } else next();
+    }
+}
+
 module.exports = {
     jwt: function(options) {
         if(!options.cookieless){
@@ -115,9 +137,23 @@ module.exports = {
                 console.log(`ShieldJS - UNAUTHORIZED`);
                 res.status(401);
                 next(err);
-            } else if(options.userInfo)
-                this.getUserInfo({domain:options.domain})(req, res, next);
+            }
         });
+
+        if(options.userInfo)
+            router.use(function (req, res, next) {
+                if (options.excludeRoutes)
+                    for (let i = 0; i < options.excludeRoutes.length; i++)
+                        if (req.path.startsWith(options.excludeRoutes[i]))
+                            return next();
+
+                if(authRoute){
+                    if (req.originalUrl.startsWith(authRoute))
+                        return next();
+                }
+
+                getUserInfo({domain:options.domain})(req, res, next);
+            });
 
         return router;
     },
@@ -190,25 +226,5 @@ module.exports = {
                 fulfill('Bearer ' + access_token);
         })
     },
-    getUserInfo: function(options) {
-        return function(err, req, res, next) {
-            if(!req.user.profile){
-                var header;
-                if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
-                    header = req.headers.authorization.split(' ')[1];
-                } else if (req.cookies && req.cookies.id_token) {
-                    header = req.cookies.id_token;
-                }
-
-                if(header){
-                    request.post({url: `https://${options.domain}/tokeninfo`, json: { id_token: header }}, function(err, res) {
-                        if(res.statusCode == 200){
-                            req.user.profile = res.body;
-                            return next();
-                        }
-                    })
-                }
-            } else next();
-        }
-    }
+    getUserInfo: getUserInfo
 }
