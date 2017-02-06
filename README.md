@@ -34,9 +34,11 @@ const shield = require("shieldjs");
 const app = express();
 
 // Will be used as JWT Middleware
+// Token will be accessible from req.user object.
 app.use(shield.jwt(
     {
-        excludeRoutes: ['/abc'],
+      excludeRoutes: ['/abc'], // UNPROTECTED ROUTES
+      userInfo: true,          // IF TRUE, USER PROFILE WILL BE ACCESSIBLE FROM REQ.USER.PROFILE WILL 
     	domain: AUTH0.DOMAIN,
     	client_id: AUTH0.CLIENT_ID,
     	secret: AUTH0.CLIENT_SECRET
