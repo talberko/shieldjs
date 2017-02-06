@@ -38,7 +38,7 @@ const app = express();
 app.use(shield.jwt(
     {
       excludeRoutes: ['/abc'], // UNPROTECTED ROUTES
-      userInfo: true,          // IF TRUE, USER PROFILE WILL BE ACCESSIBLE FROM REQ.USER.PROFILE WILL 
+      userInfo: true,          // IF TRUE, USER PROFILE WILL BE ACCESSIBLE FROM REQ.USER.PROFILE 
     	domain: AUTH0.DOMAIN,
     	client_id: AUTH0.CLIENT_ID,
     	secret: AUTH0.CLIENT_SECRET
@@ -56,6 +56,8 @@ app.use(shield.authRoutes({
         callback_url: AUTH0.CALLBACK_URL
     }
 }))
+
+app.use('/example', shield.allowScopes(['write:records'])); // WILL ALLOW ACCESS BY THE SCOPE ATTRIBUTE
 ```
 
 #### If authRoute will not be provided, not authentication routes will be created!
